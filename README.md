@@ -1,17 +1,17 @@
-This is smartctl smarttools based monitoring solution. Fork from mad-hacking.ne_
+# This is smartctl smarttools based monitoring solution. Fork from mad-hacking.ne_
 
-Whats new:
+## Whats new:
 
-Adjusted scripts and snmp mibs files
+### Adjusted scripts and snmp mibs files
 
-Structure:
+## Structure:
 
-smartctlmon
+### smartctlmon
 
 -> snmp/
 -> etc  lib  mibs  sbin  var
 
-Files:
+## Files:
 
 snmp/etc/
 snmpd-smartctl-connector
@@ -32,19 +32,20 @@ SMARTCTL-PLUS-MIB.txt < MIB def.
 zabbix/
 Template_Supermicro_Superdoctor5_SNMP_LLDv2.xml < custom zabbix template what has also superdoctor5 other functions
 
-Bundled together: smartctlmon.tar
+## Bundled together: smartctlmon.tar
 
-Installing:
+### Installing:
 
-Copy dir/files to /opt/smartctlmon/
+1. Copy dir/files to /opt/smartctlmon/
 
-Enable SNMPD conf. Look at file example
-Run first time script update-smartctl-cache and add it to crontab 10 minutes interval
+2. Enable SNMPD conf. Look at file example
+3. Run first time script update-smartctl-cache and add it to crontab 10 minutes interval
 
-To get superdoctor5 mon functions you need to install it separately
-For zabbix import Template_Supermicro_Superdoctor5_SNMP_LLDv2.xml
+4. For zabbix import Template_Supermicro_Superdoctor5_SNMP_LLDv2.xml
 
-Tests:
+### To get superdoctor5 mon functions you need to install it separately
+
+## Tests:
 
 snmptranslate -Tp SMARTCTL-MIB::smartCtlTable
 snmpwalk -c "replacewithcommunityname" -v2c localhost SMARTCTL-MIB::smartCtlTable
