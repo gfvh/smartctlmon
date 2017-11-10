@@ -30,8 +30,12 @@ snmp/mibs/
 SMARTCTL-MIB.txt < MIB definations
 SMARTCTL-PLUS-MIB.txt < MIB def.
 
-zabbix/
+zabbix_templates/
 Template_Supermicro_Superdoctor5_SNMP_LLDv2.xml < custom zabbix template what has also superdoctor5 other functions
+
+Template_Smartmontools_SNMP.xml < single file for disk status only
+
+Supermicro_OS_standard_plus_HW.xml < main template file what links
 
 Bundled together: smartctlmon.tar
 
