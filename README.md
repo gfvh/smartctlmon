@@ -2,7 +2,7 @@
 
 ## Whats new:
 
-#### Forked from mad-hacking website
+#### Forked from mad-hacking
 #### Adjusted scripts and snmp mibs files
 
 ## Structure:
@@ -53,4 +53,4 @@ Bundled together: smartctlmon.tar
 ## Tests:
 
 snmptranslate -Tp SMARTCTL-MIB::smartCtlTable
-snmpwalk -c "replacewithcommunityname" -v2c localhost SMARTCTL-MIB::smartCtlTable
+snmpwalk -c "replacewithcommunityname" -v2c localhost .1.3.6.1.4.1.38696.2.1
