@@ -32,6 +32,8 @@ SMARTCTL-PLUS-MIB.txt < MIB def.
 zabbix/
 Template_Supermicro_Superdoctor5_SNMP_LLDv2.xml < custom zabbix template what has also superdoctor5 other functions
 
+Bundled together: smartctlmon.tar
+
 Installing:
 
 Copy dir/files to /opt/smartctlmon/
