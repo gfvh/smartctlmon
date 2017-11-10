@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>3.4</version>
-    <date>2017-11-10T14:18:40Z</date>
+    <date>2017-11-10T16:59:36Z</date>
     <groups>
         <group>
             <name>Smartmontools_SNMP</name>
@@ -67,7 +67,7 @@
                 <item>
                     <name>Smartmontools disk status 2</name>
                     <type>4</type>
-                    <snmp_community>public</snmp_community>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
                     <snmp_oid>SMARTCTL-MIB::smartCtlDeviceHealthOK.2</snmp_oid>
                     <key>smartmontools_disk_status_2</key>
                     <delay>30s</delay>
@@ -113,4 +113,38 @@
             <screens/>
         </template>
     </templates>
+    <triggers>
+        <trigger>
+            <expression>{Template_Smartmontools_SNMP:smartmontools_disk_status.last()}=1</expression>
+            <recovery_mode>0</recovery_mode>
+            <recovery_expression/>
+            <name>disk status</name>
+            <correlation_mode>0</correlation_mode>
+            <correlation_tag/>
+            <url/>
+            <status>0</status>
+            <priority>5</priority>
+            <description>disk psyhical status</description>
+            <type>0</type>
+            <manual_close>0</manual_close>
+            <dependencies/>
+            <tags/>
+        </trigger>
+        <trigger>
+            <expression>{Template_Smartmontools_SNMP:smartmontools_disk_status_2.last()}=1</expression>
+            <recovery_mode>0</recovery_mode>
+            <recovery_expression/>
+            <name>disk status1</name>
+            <correlation_mode>0</correlation_mode>
+            <correlation_tag/>
+            <url/>
+            <status>0</status>
+            <priority>5</priority>
+            <description>second disk psyhical status</description>
+            <type>0</type>
+            <manual_close>0</manual_close>
+            <dependencies/>
+            <tags/>
+        </trigger>
+    </triggers>
 </zabbix_export>
