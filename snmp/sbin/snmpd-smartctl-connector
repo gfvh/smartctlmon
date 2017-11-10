@@ -1,0 +1,270 @@
+#!/bin/bash -u
+
+# Include snmpd-connector-lib.sh or die.
+[[ ! -r ${SNMPD_CONNECTOR_LIB:=/opt/smartctlmon/snmp/lib/snmpd-connector-lib.sh} ]] && echo "Unable to find ${SNMPD_CONNECTOR_LIB}" && exit 1
+source ${SNMPD_CONNECTOR_LIB}
+
+# Helper function to get the device path from the devices array using a 1 based index
+#
+#	@in_param	$1 - The 1 based index of the device
+#	@out_param	$2 - The path of this device
+#
+function get_device_path
+{
+	local AINDEX=$((${1} - 1))
+	eval $2=${DEVICES[${AINDEX}]}
+}
+
+# Helper function to get the device file base path from the devices array using a 1 based index
+#
+#	@in_param	$1 - The 1 based index of the device
+#	@out_param	$2 - The path of this device
+#
+function get_device_file_basepath
+{
+	local DEVPATH DEVFILE
+
+	# Make the device info filename
+	get_device_path ${1} DEVPATH
+
+	DEVFILE=${DEVPATH##\/}
+	DEVFILE=${CACHEDIR}/${DEVFILE//\//_}
+
+	eval $2=${DEVFILE}
+}
+
+# Function to send the index value
+#
+#	@in_param	$1 - The OID to send before this data
+#	@in_param	$2 - The index value
+#
+function send_index
+{
+	# If the index is in range...
+	if (( $# > 1 )); then
+		if (( ${2} <= ${#DEVICES[@]} )); then
+			# Send the OID and the index number.
+			send_integer ${1} ${2}
+			return
+		fi
+	fi
+
+	# Send the OID and NONE.
+	send_none ${1}
+}
+
+# Function to send the device path
+#
+#	@in_param	$1 - The OID to send before this data
+#	@in_param	$2 - The index value
+#
+function send_device_path
+{
+	local DEVPATH
+	get_device_path ${2} DEVPATH
+	send_string ${1} ${DEVPATH}
+}
+
+# Function to send device info - called: send_device_info OID DEVICE "Info String"
+#
+#	@in_param	$1 - The STRING to search for
+#	@in_param	$2 - The OID to send before this data
+#	@in_param	$3 - The index value
+function send_device_info
+{
+	local DEVFNAME VALUE
+
+	# Make the device info filename
+	get_device_file_basepath ${3} DEVFNAME
+	DEVFNAME="${DEVFNAME}_info"
+
+	# Find the entry in above file
+	VALUE=$(grep "${1}" < ${DEVFNAME})
+	VALUE=${VALUE#${1}}
+	send_string ${2} "${VALUE}"
+}
+
+# Function to send device health - called: send_device_hlth OID DEVICE
+#
+#	@in_param	$1 - The OID to send before this data
+#	@in_param	$2 - The index value
+#
+function send_device_hlth
+{
+	local DEVFNAME VALUES
+
+	# Make the device info filename
+	get_device_file_basepath ${2} DEVFNAME
+	DEVFNAME="${DEVFNAME}_state"
+
+	# Report any marginal errors as not OK
+	if grep FAILING_NOW < ${DEVFNAME} >/dev/null; then
+		send_boolean ${1} "F"
+		return
+	fi
+
+	# Find the entry in above file
+	VALUES=($(grep "result:" < ${DEVFNAME}))
+	
+	# If device has no health status, report as OK (would be better to skip OID entirely?)
+	if [[ "${#VALUES[*]}" -eq 0 ]]; then
+		send_boolean ${1} "T"
+		return
+	fi
+
+	[[ "${VALUES[5]}" == "PASSED" ]] && send_boolean ${1} "T" || send_boolean ${1} "F" 
+}
+
+# Function to send device attribute - called: send_device_attr OID DEVICE "Attribute String" R[aw]|L[ife]
+#
+#	@in_param	$1 - The STRING to search for
+#	@in_param	$2 - R to send RAW value, L to send LIFETIME value
+#	@in_param	$3 - The OID to send before this data
+#	@in_param	$4 - The index value
+#
+function send_device_attr
+{
+	local DEVFNAME VALUES
+
+	# Make the device info filename
+	get_device_file_basepath ${4} DEVFNAME
+	DEVFNAME="${DEVFNAME}_attr"
+
+	# Find the entry in above file
+	if VALUES=($(grep "${1}" < ${DEVFNAME})); then
+		case "${2}" in
+			"R")
+				if is_positive_integer "${VALUES[9]}"; then
+					send_gauge "${3}" "${VALUES[9]}"
+				else
+					send_gauge "${3}" -1
+				fi
+			;;
+
+			"L")
+				if is_positive_integer "${VALUES[3]##0}" && is_positive_integer "${VALUES[5]##0}"; then
+					send_gauge "${3}" $((${VALUES[3]##0} - ${VALUES[5]##0}))
+				else
+					send_gauge "${3}" -1
+				fi		
+			;;
+
+			*)
+			send_gauge ${3} -1
+			;;	
+		esac
+	else
+		send_gauge ${3} -1
+	fi
+}
+
+# Function to send device temperature - called: send_device_temp OID DEVICE
+#
+#	@in_param	$1 - The OID to send before this data
+#	@in_param	$2 - The index value
+#
+function send_device_temp
+{
+	local DEVFNAME VALUES
+
+	# Make the device info filename
+	get_device_file_basepath ${2} DEVFNAME
+	DEVFNAME="${DEVFNAME}_attr"
+
+	# Find the entry in above file
+	VALUES=($(grep "Temperature_Celsius" < ${DEVFNAME})) || \
+	VALUES=($(grep "Airflow_Temperature" < ${DEVFNAME}))
+
+	if is_positive_integer "${VALUES[9]}"; then
+		send_gauge "${1}" "${VALUES[9]}"
+	else
+		send_gauge "${1}" -1
+	fi
+}
+
+# Function to get the next index value
+#
+#	@in_param	$1 - The (optional) starting index value
+#	@echo		   - The new index or nothing if out of range
+#
+function get_next_index
+{
+	debug_function_enter "get_next_index" ${@}
+
+	# If we still have more than one element in the request array then something
+	# is wrong so log an error and return 0.
+	if (( $# > 1 )); then
+		error_echo "get_next_index: called with $# request array elements!"
+		debug_function_return
+		return
+	fi
+
+	# If we were passed a starting index...
+	if (( $# > 0 )); then
+		# If the passed index is less than the number of devices then return it +1,
+		# otherwise return 0 to indicate that the index would be out of range. 
+		if (( ${1} < ${#DEVICES[@]} )); then
+			RETVAL=$(( ${1} + 1 ))
+			debug_echo "next index is in range, returning ${RETVAL}"
+			echo "${RETVAL}"
+			debug_function_return
+			return
+		else
+			debug_echo "next index would be out of range, returning zero"
+			debug_function_return
+			return
+		fi
+	fi
+
+	# If we got this far then we were not passed an index so return the first
+	# available index.
+	debug_echo "no index supplied, returning first index"
+	echo "1"
+	debug_function_return
+	return
+}
+
+# Init local vars
+CMDNAME=$(basename ${0})
+CONFIG="/opt/smartctlmon/snmp/etc/snmpd-smartctl-connector"
+DEVICES=""
+CACHEDIR=""
+SNMP_TRANSLATE=""
+
+# Read the config file if we can
+[[ -r ${CONFIG} ]] && source ${CONFIG} || die "Unable to read configuration file [${CONFIG}]"
+
+# Check for config values.
+[[ -z "${DEVICES}" ]] && die "No DEVICES configured in ${CONFIG}"
+[[ -z "${CACHEDIR}" ]] && die "No CACHEDIR configured in ${CONFIG}"
+[[ ! -d "${CACHEDIR}" ]] && die "Cache directory [${CACHEDIR}] is not a directory"
+[[ ! -r "${CACHEDIR}" ]] && die "Cache directory [${CACHEDIR}] is not readable by $(whoami)"
+[[ -z "${SNMP_TRANSLATE}" ]] && die "No SNMP_TRANSLATE command configured in ${CONFIG}"
+
+# Configure base address
+BASE_MIB="SMARTCTL-MIB::smartCtl"
+
+# Declare the tables
+RTABLE[2]="#ETABLE"
+	ETABLE[1]="#FTABLE"
+		FTABLE_INDEX="get_next_index"								# Internal function to get next index
+		FTABLE[1]="send_index"										# It is an index request.
+		FTABLE[2]="send_device_path" 								# It is for the mapped device path.
+		FTABLE[3]="send_device_info 'Model Family:'" 				# It is for the device model-family.
+		FTABLE[4]="send_device_info 'Device Model:'"				# It is for the device device-model.
+		FTABLE[5]="send_device_info 'Serial Number:'" 				# It is for the device serial number.
+		FTABLE[6]="send_device_info 'User Capacity:'" 				# It is for the device user capacity.
+		FTABLE[7]="send_device_info 'ATA Version is:'"				# It is for the device ATA version.
+		FTABLE[8]="send_device_hlth"								# It is for the overall SMART health state.
+		FTABLE[9]="send_device_temp" 								# It is for the device temperature.
+		FTABLE[10]="send_device_attr 'Reallocated_Sector_Ct' R" 	# It is for the Reallocated Sector Count of this device.
+		FTABLE[11]="send_device_attr 'Current_Pending_Sector' R"	# It is for the Current Pending Sector count of this device.
+		FTABLE[12]="send_device_attr 'Offline_Uncorrectable' R" 	# It is for the Off-line Uncorrectable count of this device.
+		FTABLE[13]="send_device_attr 'UDMA_CRC_Error_Count' R" 		# It is for the UDMA CRC Error count of this device.
+		FTABLE[14]="send_device_attr 'Read_Error_Rate' L" 			# It is for the Read Error Rate (lifetime) of this device.
+		FTABLE[15]="send_device_attr 'Seek_Error_Rate' L"	 		# It is for the Seek Error Rate (lifetime) of this device.
+		FTABLE[16]="send_device_attr 'Hardware_ECC_Recovered' L" 	# It is for the Hardware ECC recovered (lifetime) of this device.
+		FTABLE[17]="send_device_info 'Firmware Version:'" 			# It is for the Firmware Version installed on this device.
+
+# Start the loop
+the_loop

@@ -1,0 +1,14 @@
+# List (or glob) of disk devices to monitor
+DEVICES=(/dev/sd*[a-z])
+
+# Path to cache directory
+CACHEDIR=/opt/smartctlmon/snmp/var/lib/smartctl
+
+# Command to run smartctl
+SMARTCMD="/usr/sbin/smartctl"
+
+# Command to run snmptranslate
+SNMP_TRANSLATE="/usr/bin/snmptranslate"
+
+# Define debug to log lots
+# DEBUG="true"

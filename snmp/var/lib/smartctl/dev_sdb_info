@@ -1,0 +1,19 @@
+smartctl 6.2 2017-02-27 r4394 [x86_64-linux-3.10.0-693.5.2.el7.x86_64] (local build)
+Copyright (C) 2002-13, Bruce Allen, Christian Franke, www.smartmontools.org
+
+=== START OF INFORMATION SECTION ===
+Model Family:     Seagate Barracuda 7200.14 (AF)
+Device Model:     ST250DM000-1BC141
+Serial Number:    6VYBXZBM
+LU WWN Device Id: 5 000c50 045917e37
+Firmware Version: JC4B
+User Capacity:    250,059,350,016 bytes [250 GB]
+Sector Size:      512 bytes logical/physical
+Rotation Rate:    7200 rpm
+Device is:        In smartctl database [for details use: -P show]
+ATA Version is:   ATA8-ACS T13/1699-D revision 4
+SATA Version is:  SATA 3.0, 6.0 Gb/s (current: 3.0 Gb/s)
+Local Time is:    Wed Nov  8 19:41:55 2017 CET
+SMART support is: Available - device has SMART capability.
+SMART support is: Enabled
+

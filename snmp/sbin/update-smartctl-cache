@@ -1,0 +1,152 @@
+#!/bin/bash
+
+function versioninfo
+{
+	VERSION="$Revision$"
+	VERSION="${VERSION%\ \$}"; VERSION="${VERSION#\:}"; VERSION="${VERSION##\ }"
+	VERSION="(CVS revision $VERSION)"
+	
+	NAME="$Name$"
+	NAME="${NAME%\ \$}"; NAME="${NAME#\:}"; NAME="${NAME##\ }"; NAME="${NAME##release-}"; NAME="${NAME//-/.}"
+	[[ -n $NAME ]] && NAME="Version $NAME "
+
+	echo ${CMDNAME}
+	echo ${NAME}${VERSION}
+
+	echo -e "\n smartctlmon by it community"
+	echo "This is free software: you are free to change and redistribute it. MIT license"
+}
+
+function helpscreen
+{
+	echo "Usage: ${CMDNAME} [OPTION]..."
+	echo "Maintaines cache files of SMART data for configured devices."
+	echo
+	echo "  -i, --info-rebuild             force a rebuild of the info cache file for all"
+	echo "                                 devices in addition to the normal attribute and"
+	echo "                                 health files"
+	echo "      --help                     display this help and exit"
+    echo "      --version                  output version information and exit"
+}
+
+function error_exit
+{
+	echo "Error: $1" >&2
+	exit $2
+}
+
+# Init local vars
+CMDNAME=$(basename ${0})
+CONFIG="/opt/smartctlmon/snmp/etc/snmpd-smartctl-connector"
+
+# Read the config file if we can
+[[ -r $CONFIG ]] && source $CONFIG
+
+# Process command line switches
+while (( $# > 0 ))
+do
+	case $1 in
+		-i|--info-rebuild)
+			INFO_REBUILD="YES"
+			shift 1
+		;;
+		--version)
+			versioninfo
+			exit
+		;;	
+		*)
+			helpscreen
+			shift 1
+			exit
+		;;
+	esac
+done
+
+# If we couldn't open the config file then complain and exit.
+[[ ! -r $CONFIG ]] && error_exit "Unable to open configuration file [$CONFIG]" 1
+
+# Check for sensible configuration values.
+[[ -z ${DEVICES} ]] && error_exit "No DEVICES defined in $CONFIG" 2
+[[ -z ${CACHEDIR} ]] && error_exit "No CACHEDIR defined in $CONFIG" 3
+[[ -z ${SMARTCMD} ]] && error_exit "No SMARTCMD defined in $CONFIG" 4
+
+# Check that the cache directory exists and is writable
+if [[ ! -d ${CACHEDIR} ]]; then
+	mkdir -p ${CACHEDIR} || error_exit "Cache directory [$CACHEDIR] does not exist and could not be created" 5
+fi
+[[ ! -w ${CACHEDIR} ]] && error_exit "Cache directory [$CACHEDIR] is not writable" 6
+
+# Check that the devices list exists...
+if [[ -f ${CACHEDIR}/devices ]]; then
+	# Compare the stored list of devices to the current list.
+	if [[ "$(cat ${CACHEDIR}/devices)" = ${DEVICES[@]} ]]; then
+
+		# Check that the info cache exists for all devices...
+		for DEVICE in ${DEVICES[@]}; do
+			DEVFNAME=${DEVICE##\/}
+			DEVFNAME=${CACHEDIR}/${DEVFNAME//\//_}_info
+
+			# ...and set the INFO_REBUILD flag if it doesn't exist or is older than the device node.
+			if [[ ! -f ${DEVFNAME} ]]; then
+				INFO_REBUILD="YES"
+			else
+				[[ ${DEVFNAME} -ot ${DEVICE} ]] && INFO_REBUILD="YES"
+			fi
+		done
+	else
+		# The device list doesn't match.
+		INFO_REBUILD="YES"
+	fi
+else
+	# The device list doesn't exist.
+	INFO_REBUILD="YES"
+fi
+
+# If the INFO_REBUILD flag is set then completely clean the cache and rebuild the info files for all devices.
+if [[ ! -z ${INFO_REBUILD} ]]; then
+	echo -n "Cleaning cache files..."
+	rm ${CACHEDIR}/* &> /dev/null 
+	echo "done."
+	echo -n "Storing device list..."
+	echo ${DEVICES[@]} > ${CACHEDIR}/devices
+	echo "done."
+	echo -n "Rebuilding info files..."
+	for DEVICE in ${DEVICES[@]}; do
+		DEVFNAME=${DEVICE##\/}	 
+		DEVFNAME=${CACHEDIR}/${DEVFNAME//\//_}_info
+	
+		${SMARTCMD} -i ${DEVICE} > ${DEVFNAME}
+	done
+	echo "done."
+fi
+
+# Rebuild the status cache for all devices.
+echo -n "Rebuilding state files..."
+for DEVICE in ${DEVICES[@]}; do
+	DEVFNAME=${DEVICE##\/}	 
+	DEVFNAME=${CACHEDIR}/${DEVFNAME//\//_}_state
+	TDEVFNAME=${DEVFNAME}.tmp
+
+	${SMARTCMD} -H ${DEVICE} > ${TDEVFNAME}
+	mv ${TDEVFNAME} ${DEVFNAME}
+done
+echo "done."
+
+# Rebuild the attribute cache for all devices.
+echo -n "Rebuilding attribute files..."
+for DEVICE in ${DEVICES[@]}; do
+	DEVFNAME=${DEVICE##\/}	 
+	DEVFNAME=${CACHEDIR}/${DEVFNAME//\//_}_attr
+	TDEVFNAME=${DEVFNAME}.tmp
+
+	${SMARTCMD} -A ${DEVICE} > ${TDEVFNAME}
+	mv ${TDEVFNAME} ${DEVFNAME}
+done
+echo "done."
+
+# If the INFO_REBUILD flag is set kill any connector processes.
+if [[ ! -z ${INFO_REBUILD} ]]; then
+	echo -n "Killing any running connectors..."
+	killall snmpd-smartctl-connector
+	echo "done."
+fi
