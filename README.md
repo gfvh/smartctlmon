@@ -35,7 +35,7 @@ Template_Supermicro_Superdoctor5_SNMP_LLDv2.xml < custom zabbix template what ha
 
 Template_Smartmontools_SNMP.xml < single file for disk status only
 
-Supermicro_OS_standard_plus_HW.xml < main template file what links
+Supermicro_OS_standard_plus_HW.xml < main template file what links templates together
 
 Bundled together: smartctlmon.tar
 
@@ -46,7 +46,7 @@ Bundled together: smartctlmon.tar
 1. Copy dir/files to /opt/smartctlmon/
 2. Enable SNMPD conf. Look at file example
 3. Run first time script update-smartctl-cache and add it to crontab 10 minutes interval
-4. For zabbix import Template_Supermicro_Superdoctor5_SNMP_LLDv2.xml
+4. For zabbix import template files
 
 ### To get superdoctor5 mon functions you need to install it separately
 
