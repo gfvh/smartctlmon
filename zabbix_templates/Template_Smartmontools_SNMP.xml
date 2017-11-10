@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>3.4</version>
-    <date>2017-11-10T16:59:36Z</date>
+    <date>2017-11-10T17:12:21Z</date>
     <groups>
         <group>
             <name>Smartmontools_SNMP</name>
@@ -27,7 +27,7 @@
                     <name>Smartmontools disk status</name>
                     <type>4</type>
                     <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
-                    <snmp_oid>SMARTCTL-MIB::smartCtlDeviceHealthOK.1</snmp_oid>
+                    <snmp_oid>.1.3.6.1.4.1.38696.2.1.2.1.8.1</snmp_oid>
                     <key>smartmontools_disk_status</key>
                     <delay>30s</delay>
                     <history>90d</history>
@@ -68,7 +68,7 @@
                     <name>Smartmontools disk status 2</name>
                     <type>4</type>
                     <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
-                    <snmp_oid>SMARTCTL-MIB::smartCtlDeviceHealthOK.2</snmp_oid>
+                    <snmp_oid>.1.3.6.1.4.1.38696.2.1.2.1.8.2</snmp_oid>
                     <key>smartmontools_disk_status_2</key>
                     <delay>30s</delay>
                     <history>90d</history>
