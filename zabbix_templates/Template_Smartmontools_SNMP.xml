@@ -26,7 +26,7 @@
                 <item>
                     <name>Smartmontools disk status</name>
                     <type>4</type>
-                    <snmp_community>public</snmp_community>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
                     <snmp_oid>SMARTCTL-MIB::smartCtlDeviceHealthOK.1</snmp_oid>
                     <key>smartmontools_disk_status</key>
                     <delay>30s</delay>
