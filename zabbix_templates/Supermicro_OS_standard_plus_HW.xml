@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>3.4</version>
-    <date>2017-11-10T14:17:40Z</date>
+    <date>2017-11-12T09:13:58Z</date>
     <groups>
         <group>
             <name>SuperMicro</name>
@@ -41,7 +41,7 @@
                     <name>Template Module Interfaces Simple SNMPv2</name>
                 </template>
                 <template>
-                    <name>Template Supermicro SNMP Superdoctor 5 LLD and smarttools</name>
+                    <name>Template Supermicro SNMP Superdoctor 5 LLD</name>
                 </template>
                 <template>
                     <name>Template_Smartmontools_SNMP</name>
@@ -50,22 +50,4 @@
             <screens/>
         </template>
     </templates>
-    <triggers>
-        <trigger>
-            <expression>{SuperMicro:supermicro_mb_biosversion.diff()}=1</expression>
-            <recovery_mode>0</recovery_mode>
-            <recovery_expression/>
-            <name>Supermicro bios was change to {ITEM.LASTVALUE} on {HOST.DNS}</name>
-            <correlation_mode>0</correlation_mode>
-            <correlation_tag/>
-            <url/>
-            <status>0</status>
-            <priority>1</priority>
-            <description/>
-            <type>0</type>
-            <manual_close>1</manual_close>
-            <dependencies/>
-            <tags/>
-        </trigger>
-    </triggers>
 </zabbix_export>
