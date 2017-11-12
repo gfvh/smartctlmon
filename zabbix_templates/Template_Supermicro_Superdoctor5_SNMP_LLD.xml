@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>3.4</version>
-    <date>2017-11-10T15:40:53Z</date>
+    <date>2017-11-12T09:15:57Z</date>
     <groups>
         <group>
             <name>Supermicro servers</name>
@@ -9,8 +9,8 @@
     </groups>
     <templates>
         <template>
-            <template>Template Supermicro SNMP Superdoctor 5 LLD and smarttools</template>
-            <name>Template Supermicro SNMP Superdoctor 5 LLD and smarttools</name>
+            <template>Template Supermicro SNMP Superdoctor 5 LLD</template>
+            <name>Template Supermicro SNMP Superdoctor 5 LLD</name>
             <description/>
             <groups>
                 <group>
@@ -126,7 +126,7 @@
                     <name>Physical disk</name>
                     <type>4</type>
                     <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
-                    <snmp_oid>discovery[{#SNMPVALUE},.1.3.6.1.4.1.38696.2.1.2.1]</snmp_oid>
+                    <snmp_oid>discovery[{#SNMPVALUE},.1.3.6.1.4.1.10876.100.1.4.1.5]</snmp_oid>
                     <key>supermicro_diskmodel</key>
                     <delay>{$DISC_DISCOVERY_TIME}</delay>
                     <status>1</status>
@@ -171,7 +171,7 @@
                             <name>Supermicro disk {#SNMPINDEX} model</name>
                             <type>4</type>
                             <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
-                            <snmp_oid>.1.3.6.1.4.1.38696.2.1.2.1.{#SNMPINDEX}</snmp_oid>
+                            <snmp_oid>.1.3.6.1.4.1.10876.100.1.4.1.5.{#SNMPINDEX}</snmp_oid>
                             <key>supermicro_disc_model[{#SNMPINDEX}]</key>
                             <delay>{$PD_REQUEST_PERIOD}</delay>
                             <history>90d</history>
@@ -213,13 +213,13 @@
                             <name>Supermicro disk {#SNMPINDEX} smart status</name>
                             <type>4</type>
                             <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
-                            <snmp_oid>.1.3.6.1.4.1.38696.2.1.2.1.8.{#SNMPINDEX}</snmp_oid>
+                            <snmp_oid>.1.3.6.1.4.1.10876.100.1.4.1.4.{#SNMPINDEX}</snmp_oid>
                             <key>supermicro_disk_smart[{#SNMPINDEX}]</key>
                             <delay>{$PD_REQUEST_PERIOD}</delay>
                             <history>90d</history>
                             <trends>365d</trends>
                             <status>0</status>
-                            <value_type>1</value_type>
+                            <value_type>3</value_type>
                             <allowed_hosts/>
                             <units/>
                             <snmpv3_contextname/>
@@ -257,7 +257,7 @@
                             <name>Supermicro disk {#SNMPINDEX} serial number</name>
                             <type>4</type>
                             <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
-                            <snmp_oid>.1.3.6.1.4.1.38696.2.1.2.1.5.{#SNMPINDEX}</snmp_oid>
+                            <snmp_oid>.1.3.6.1.4.1.10876.100.1.4.1.1.{#SNMPINDEX}</snmp_oid>
                             <key>supermicro_disk_sn[{#SNMPINDEX}]</key>
                             <delay>{$PD_REQUEST_PERIOD}</delay>
                             <history>90d</history>
