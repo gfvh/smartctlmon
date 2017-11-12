@@ -48,7 +48,9 @@ Bundled mibs and sh: smartctlmon.tar (does not include zabbix template files).
 3. Run first time script update-smartctl-cache and add it to crontab 10 minutes interval
 4. For zabbix import template files
 
-### To get superdoctor5 mon functions you need to install it separately
+##### import order should be: Template_Supermicro_Superdoctor5_SNMP_LLD.xml -> then Template_Smartmontools_SNMP.xml -> Supermicro_OS_standard_plus_HW.xml 
+
+### To get superdoctor5 mon functions you need to install it from supermicro site separately
 
 ## Tests:
 
