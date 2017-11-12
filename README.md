@@ -2,7 +2,7 @@
 
 ## Whats new:
 
-#### Forked from mad-hacking
+#### Forked sh scripts from mad-hacking site
 #### Adjusted scripts and snmp mibs files
 
 ## Structure:
@@ -31,13 +31,13 @@ SMARTCTL-MIB.txt < MIB definations
 SMARTCTL-PLUS-MIB.txt < MIB def.
 
 zabbix_templates/
-Template_Supermicro_Superdoctor5_SNMP_LLDv2.xml < custom zabbix template what has also superdoctor5 other functions
+Template_Supermicro_Superdoctor5_SNMP_LLD.xml < custom zabbix template what has also superdoctor5 other functions
 
 Template_Smartmontools_SNMP.xml < single file for disk status only
 
 Supermicro_OS_standard_plus_HW.xml < main template file what links templates together
 
-Bundled together: smartctlmon.tar
+Bundled mibs and sh: smartctlmon.tar (does not include zabbix template files).
 
 ### Installing:
 
