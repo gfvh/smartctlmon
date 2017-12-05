@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>3.4</version>
-    <date>2017-11-12T09:13:58Z</date>
+    <date>2017-12-05T11:21:44Z</date>
     <groups>
         <group>
             <name>SuperMicro</name>
@@ -24,10 +24,13 @@
             <macros>
                 <macro>
                     <macro>{$SNMP_COMMUNITY}</macro>
-                    <value>13puras</value>
+                    <value>change_this</value>
                 </macro>
             </macros>
             <templates>
+                <template>
+                    <name>Template IPMI Supermicro H8DGT</name>
+                </template>
                 <template>
                     <name>Template Module EtherLike-MIB SNMPv2</name>
                 </template>
@@ -39,9 +42,6 @@
                 </template>
                 <template>
                     <name>Template Module Interfaces Simple SNMPv2</name>
-                </template>
-                <template>
-                    <name>Template Supermicro SNMP Superdoctor 5 LLD</name>
                 </template>
                 <template>
                     <name>Template_Smartmontools_SNMP</name>
